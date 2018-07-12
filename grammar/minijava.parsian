@@ -1,0 +1,47 @@
+(*
+Grammar for MiniJava language
+(see http://www.cambridge.org/resources/052182060X/MCIIJ2e/grammar.htm)
+Author: Thomas Bollmeier 2018 <entwickler@tbollmeier.de>
+Version: 0.1.0
+*)
+
+-- Lexical elements
+
+comment '//' '\n';
+comment '/*' '*/' enable_nesting;
+
+symbol LBRACE '{';
+symbol RBRACE '}';
+symbol LPAR '(';
+symbol RPAR ')';
+symbol LSQBR '[';
+symbol RSQBR ']';
+symbol EQ '=';
+symbol SEMICOLON ';';
+
+token ID /[a-zA-Z_][a-zA-Z_0-9]*/;
+token INT /\d+/;
+
+-- Production rules
+
+@root
+goal -> main_class class_decl*;
+
+main_class -> 'class' clsname#ID LBRACE
+    'public' 'static' 'void' 'main'
+    LPAR 'String' LSQBR RSQBR args#ID RPAR
+    LBRACE statement RBRACE RBRACE;
+
+class_decl -> 'class' clsname#ID ('extends' super#ID)?
+    LBRACE
+    RBRACE;
+
+statement ->
+    block_stmt |
+    assignment;
+
+block_stmt -> LBRACE statement* RBRACE;
+
+assignment -> ID EQ expr SEMICOLON;
+
+expr -> ID | INT | 'this';
