@@ -18,7 +18,9 @@ symbol LSQBR '[';
 symbol RSQBR ']';
 symbol EQ '=';
 symbol SEMICOLON ';';
+symbol COMMA ',';
 
+token PRINT /System\.out\.println/;
 token ID /[a-zA-Z_][a-zA-Z_0-9]*/;
 token INT /\d+/;
 
@@ -27,21 +29,51 @@ token INT /\d+/;
 @root
 goal -> main_class class_decl*;
 
-main_class -> 'class' clsname#ID LBRACE
-    'public' 'static' 'void' 'main'
-    LPAR 'String' LSQBR RSQBR args#ID RPAR
-    LBRACE statement RBRACE RBRACE;
+main_class -> 'class' clsname#ID
+    LBRACE
+        main_signature LBRACE
+            statement
+        RBRACE
+    RBRACE;
+
+main_signature -> 'public' 'static' 'void' 'main'
+    LPAR 'String' LSQBR RSQBR args#ID RPAR;
 
 class_decl -> 'class' clsname#ID ('extends' super#ID)?
     LBRACE
+        var_decl*
+        method_decl*
     RBRACE;
+
+var_decl -> type ID SEMICOLON;
+
+method_decl -> 'public' type method_signature LBRACE
+    var_decl*
+    statement*
+    'return' expr SEMICOLON
+RBRACE;
+
+method_signature -> ID LPAR
+    (type ID (COMMA type ID)*)?
+RPAR;
+
+type -> 'int' (array#LSQBR RSQBR)? | 'boolean' | ID;
 
 statement ->
     block_stmt |
+    if_stmt |
+    while_stmt |
+    print_stmt |
     assignment;
 
 block_stmt -> LBRACE statement* RBRACE;
 
-assignment -> ID EQ expr SEMICOLON;
+if_stmt -> 'if' LPAR expr RPAR statement 'else' statement;
+
+while_stmt -> 'while' LPAR expr RPAR statement;
+
+print_stmt -> PRINT LPAR expr RPAR SEMICOLON;
+
+assignment -> ID (LSQBR idx#expr RSQBR)? EQ expr SEMICOLON;
 
 expr -> ID | INT | 'this';

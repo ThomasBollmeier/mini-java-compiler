@@ -36,7 +36,9 @@ class MiniJavaBaseParser extends parsian\Parser
         $lexer->addSymbol("]", "RSQBR");
         $lexer->addSymbol("=", "EQ");
         $lexer->addSymbol(";", "SEMICOLON");
+        $lexer->addSymbol(",", "COMMA");
 
+        $lexer->addTerminal("/System\.out\.println/", "PRINT");
         $lexer->addTerminal("/[a-zA-Z_][a-zA-Z_0-9]*/", "ID");
         $lexer->addTerminal("/\d+/", "INT");
 
@@ -48,6 +50,13 @@ class MiniJavaBaseParser extends parsian\Parser
         $lexer->addKeyword("String");
         $lexer->addKeyword("class");
         $lexer->addKeyword("extends");
+        $lexer->addKeyword("public");
+        $lexer->addKeyword("return");
+        $lexer->addKeyword("int");
+        $lexer->addKeyword("boolean");
+        $lexer->addKeyword("if");
+        $lexer->addKeyword("else");
+        $lexer->addKeyword("while");
         $lexer->addKeyword("this");
 
     }
@@ -63,20 +72,44 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar->rule("main_class",
             $this->seq_2(),
             false);
-        $grammar->rule("class_decl",
+        $grammar->rule("main_signature",
             $this->seq_3(),
             false);
-        $grammar->rule("statement",
-            $this->alt_1(),
+        $grammar->rule("class_decl",
+            $this->seq_4(),
             false);
-        $grammar->rule("block_stmt",
-            $this->seq_5(),
-            false);
-        $grammar->rule("assignment",
+        $grammar->rule("var_decl",
             $this->seq_6(),
             false);
-        $grammar->rule("expr",
+        $grammar->rule("method_decl",
+            $this->seq_7(),
+            false);
+        $grammar->rule("method_signature",
+            $this->seq_8(),
+            false);
+        $grammar->rule("type",
+            $this->alt_1(),
+            false);
+        $grammar->rule("statement",
             $this->alt_2(),
+            false);
+        $grammar->rule("block_stmt",
+            $this->seq_13(),
+            false);
+        $grammar->rule("if_stmt",
+            $this->seq_14(),
+            false);
+        $grammar->rule("while_stmt",
+            $this->seq_15(),
+            false);
+        $grammar->rule("print_stmt",
+            $this->seq_16(),
+            false);
+        $grammar->rule("assignment",
+            $this->seq_17(),
+            false);
+        $grammar->rule("expr",
+            $this->alt_3(),
             false);
 
     }
@@ -86,11 +119,24 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar = $this->getGrammar();
 
         return $grammar->alt()
-            ->add($grammar->ruleRef("block_stmt"))
-            ->add($grammar->ruleRef("assignment"));
+            ->add($this->seq_11())
+            ->add($grammar->term("BOOLEAN"))
+            ->add($grammar->term("ID"));
     }
 
     private function alt_2()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->alt()
+            ->add($grammar->ruleRef("block_stmt"))
+            ->add($grammar->ruleRef("if_stmt"))
+            ->add($grammar->ruleRef("while_stmt"))
+            ->add($grammar->ruleRef("print_stmt"))
+            ->add($grammar->ruleRef("assignment"));
+    }
+
+    private function alt_3()
     {
         $grammar = $this->getGrammar();
 
@@ -110,6 +156,104 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->many($grammar->ruleRef("class_decl")));
     }
 
+    private function seq_10()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("COMMA"))
+            ->add($grammar->ruleRef("type"))
+            ->add($grammar->term("ID"));
+    }
+
+    private function seq_11()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("INT"))
+            ->add($grammar->opt($this->seq_12()));
+    }
+
+    private function seq_12()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("LSQBR", "array"))
+            ->add($grammar->term("RSQBR"));
+    }
+
+    private function seq_13()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("LBRACE"))
+            ->add($grammar->many($grammar->ruleRef("statement")))
+            ->add($grammar->term("RBRACE"));
+    }
+
+    private function seq_14()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("IF"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("RPAR"))
+            ->add($grammar->ruleRef("statement"))
+            ->add($grammar->term("ELSE"))
+            ->add($grammar->ruleRef("statement"));
+    }
+
+    private function seq_15()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("WHILE"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("RPAR"))
+            ->add($grammar->ruleRef("statement"));
+    }
+
+    private function seq_16()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("PRINT"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("RPAR"))
+            ->add($grammar->term("SEMICOLON"));
+    }
+
+    private function seq_17()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("ID"))
+            ->add($grammar->opt($this->seq_18()))
+            ->add($grammar->term("EQ"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("SEMICOLON"));
+    }
+
+    private function seq_18()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("LSQBR"))
+            ->add($grammar->ruleRef("expr", "idx"))
+            ->add($grammar->term("RSQBR"));
+    }
+
     private function seq_2()
     {
         $grammar = $this->getGrammar();
@@ -118,16 +262,7 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->term("CLASS"))
             ->add($grammar->term("ID", "clsname"))
             ->add($grammar->term("LBRACE"))
-            ->add($grammar->term("PUBLIC"))
-            ->add($grammar->term("STATIC"))
-            ->add($grammar->term("VOID"))
-            ->add($grammar->term("MAIN"))
-            ->add($grammar->term("LPAR"))
-            ->add($grammar->term("STRING"))
-            ->add($grammar->term("LSQBR"))
-            ->add($grammar->term("RSQBR"))
-            ->add($grammar->term("ID", "args"))
-            ->add($grammar->term("RPAR"))
+            ->add($grammar->ruleRef("main_signature"))
             ->add($grammar->term("LBRACE"))
             ->add($grammar->ruleRef("statement"))
             ->add($grammar->term("RBRACE"))
@@ -139,14 +274,33 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar = $this->getGrammar();
 
         return $grammar->seq()
-            ->add($grammar->term("CLASS"))
-            ->add($grammar->term("ID", "clsname"))
-            ->add($grammar->opt($this->seq_4()))
-            ->add($grammar->term("LBRACE"))
-            ->add($grammar->term("RBRACE"));
+            ->add($grammar->term("PUBLIC"))
+            ->add($grammar->term("STATIC"))
+            ->add($grammar->term("VOID"))
+            ->add($grammar->term("MAIN"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->term("STRING"))
+            ->add($grammar->term("LSQBR"))
+            ->add($grammar->term("RSQBR"))
+            ->add($grammar->term("ID", "args"))
+            ->add($grammar->term("RPAR"));
     }
 
     private function seq_4()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("CLASS"))
+            ->add($grammar->term("ID", "clsname"))
+            ->add($grammar->opt($this->seq_5()))
+            ->add($grammar->term("LBRACE"))
+            ->add($grammar->many($grammar->ruleRef("var_decl")))
+            ->add($grammar->many($grammar->ruleRef("method_decl")))
+            ->add($grammar->term("RBRACE"));
+    }
+
+    private function seq_5()
     {
         $grammar = $this->getGrammar();
 
@@ -155,25 +309,52 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->term("ID", "super"));
     }
 
-    private function seq_5()
-    {
-        $grammar = $this->getGrammar();
-
-        return $grammar->seq()
-            ->add($grammar->term("LBRACE"))
-            ->add($grammar->many($grammar->ruleRef("statement")))
-            ->add($grammar->term("RBRACE"));
-    }
-
     private function seq_6()
     {
         $grammar = $this->getGrammar();
 
         return $grammar->seq()
+            ->add($grammar->ruleRef("type"))
             ->add($grammar->term("ID"))
-            ->add($grammar->term("EQ"))
-            ->add($grammar->ruleRef("expr"))
             ->add($grammar->term("SEMICOLON"));
+    }
+
+    private function seq_7()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("PUBLIC"))
+            ->add($grammar->ruleRef("type"))
+            ->add($grammar->ruleRef("method_signature"))
+            ->add($grammar->term("LBRACE"))
+            ->add($grammar->many($grammar->ruleRef("var_decl")))
+            ->add($grammar->many($grammar->ruleRef("statement")))
+            ->add($grammar->term("RETURN"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("SEMICOLON"))
+            ->add($grammar->term("RBRACE"));
+    }
+
+    private function seq_8()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("ID"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->opt($this->seq_9()))
+            ->add($grammar->term("RPAR"));
+    }
+
+    private function seq_9()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->ruleRef("type"))
+            ->add($grammar->term("ID"))
+            ->add($grammar->many($this->seq_10()));
     }
 
 
