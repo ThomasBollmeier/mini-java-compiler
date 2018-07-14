@@ -28,6 +28,11 @@ class MiniJavaBaseParser extends parsian\Parser
         $lexer->addCommentType("/*", "*/", true);
 
 
+        $lexer->addSymbol("&&", "AND");
+        $lexer->addSymbol("<", "LT");
+        $lexer->addSymbol("+", "PLUS");
+        $lexer->addSymbol("-", "MINUS");
+        $lexer->addSymbol("*", "MULT");
         $lexer->addSymbol("{", "LBRACE");
         $lexer->addSymbol("}", "RBRACE");
         $lexer->addSymbol("(", "LPAR");
@@ -35,8 +40,10 @@ class MiniJavaBaseParser extends parsian\Parser
         $lexer->addSymbol("[", "LSQBR");
         $lexer->addSymbol("]", "RSQBR");
         $lexer->addSymbol("=", "EQ");
+        $lexer->addSymbol("\.", "DOT");
         $lexer->addSymbol(";", "SEMICOLON");
         $lexer->addSymbol(",", "COMMA");
+        $lexer->addSymbol("!", "EXCL_MARK");
 
         $lexer->addTerminal("/System\.out\.println/", "PRINT");
         $lexer->addTerminal("/[a-zA-Z_][a-zA-Z_0-9]*/", "ID");
@@ -57,7 +64,12 @@ class MiniJavaBaseParser extends parsian\Parser
         $lexer->addKeyword("if");
         $lexer->addKeyword("else");
         $lexer->addKeyword("while");
+        $lexer->addKeyword("length");
         $lexer->addKeyword("this");
+        $lexer->addKeyword("true");
+        $lexer->addKeyword("false");
+        $lexer->addKeyword("new");
+        $lexer->addKeyword("int");
 
     }
 
@@ -109,7 +121,37 @@ class MiniJavaBaseParser extends parsian\Parser
             $this->seq_17(),
             false);
         $grammar->rule("expr",
+            $grammar->ruleRef("binary_expr"),
+            false);
+        $grammar->rule("binary_expr",
+            $this->seq_19(),
+            false);
+        $grammar->rule("operator",
             $this->alt_3(),
+            false);
+        $grammar->rule("op_expr",
+            $this->seq_21(),
+            false);
+        $grammar->rule("base_expr",
+            $this->alt_6(),
+            false);
+        $grammar->rule("bool_expr",
+            $this->alt_7(),
+            false);
+        $grammar->rule("constructor_call",
+            $this->seq_23(),
+            false);
+        $grammar->rule("negation",
+            $this->seq_26(),
+            false);
+        $grammar->rule("group",
+            $this->seq_27(),
+            false);
+        $grammar->rule("elem_access",
+            $this->seq_28(),
+            false);
+        $grammar->rule("call",
+            $this->seq_29(),
             false);
 
     }
@@ -141,9 +183,61 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar = $this->getGrammar();
 
         return $grammar->alt()
-            ->add($grammar->term("ID"))
+            ->add($grammar->term("AND"))
+            ->add($grammar->term("LT"))
+            ->add($grammar->term("PLUS"))
+            ->add($grammar->term("MINUS"))
+            ->add($grammar->term("MULT"));
+    }
+
+    private function alt_4()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->alt()
+            ->add($this->seq_22())
+            ->add($grammar->oneOrMore($this->alt_5()));
+    }
+
+    private function alt_5()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->alt()
+            ->add($grammar->ruleRef("elem_access"))
+            ->add($grammar->ruleRef("call"));
+    }
+
+    private function alt_6()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->alt()
             ->add($grammar->term("INT"))
-            ->add($grammar->term("THIS"));
+            ->add($grammar->ruleRef("bool_expr"))
+            ->add($grammar->term("ID"))
+            ->add($grammar->term("THIS"))
+            ->add($grammar->ruleRef("constructor_call"))
+            ->add($grammar->ruleRef("negation"))
+            ->add($grammar->ruleRef("group"));
+    }
+
+    private function alt_7()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->alt()
+            ->add($grammar->term("TRUE"))
+            ->add($grammar->term("FALSE"));
+    }
+
+    private function alt_8()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->alt()
+            ->add($this->seq_24())
+            ->add($this->seq_25());
     }
 
 
@@ -254,6 +348,15 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->term("RSQBR"));
     }
 
+    private function seq_19()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->ruleRef("op_expr", "op1"))
+            ->add($grammar->opt($this->seq_20()));
+    }
+
     private function seq_2()
     {
         $grammar = $this->getGrammar();
@@ -267,6 +370,104 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->ruleRef("statement"))
             ->add($grammar->term("RBRACE"))
             ->add($grammar->term("RBRACE"));
+    }
+
+    private function seq_20()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->ruleRef("operator"))
+            ->add($grammar->ruleRef("expr", "op2"));
+    }
+
+    private function seq_21()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->ruleRef("base_expr"))
+            ->add($grammar->opt($this->alt_4()));
+    }
+
+    private function seq_22()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("DOT"))
+            ->add($grammar->term("LENGTH"));
+    }
+
+    private function seq_23()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("NEW"))
+            ->add($this->alt_8());
+    }
+
+    private function seq_24()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("INT"))
+            ->add($grammar->term("LSQBR"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("RSQBR"));
+    }
+
+    private function seq_25()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("ID"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->term("RPAR"));
+    }
+
+    private function seq_26()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("EXCL_MARK"))
+            ->add($grammar->ruleRef("expr"));
+    }
+
+    private function seq_27()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("RPAR"));
+    }
+
+    private function seq_28()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("LSQBR"))
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->term("RSQBR"));
+    }
+
+    private function seq_29()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("DOT"))
+            ->add($grammar->term("ID"))
+            ->add($grammar->term("LPAR"))
+            ->add($grammar->opt($this->seq_30()))
+            ->add($grammar->term("RPAR"));
     }
 
     private function seq_3()
@@ -284,6 +485,24 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->term("RSQBR"))
             ->add($grammar->term("ID", "args"))
             ->add($grammar->term("RPAR"));
+    }
+
+    private function seq_30()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->ruleRef("expr"))
+            ->add($grammar->many($this->seq_31()));
+    }
+
+    private function seq_31()
+    {
+        $grammar = $this->getGrammar();
+
+        return $grammar->seq()
+            ->add($grammar->term("COMMA"))
+            ->add($grammar->ruleRef("expr"));
     }
 
     private function seq_4()

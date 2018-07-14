@@ -10,6 +10,11 @@ Version: 0.1.0
 comment '//' '\n';
 comment '/*' '*/' enable_nesting;
 
+symbol AND '&&';
+symbol LT '<';
+symbol PLUS '+';
+symbol MINUS '-';
+symbol MULT '*';
 symbol LBRACE '{';
 symbol RBRACE '}';
 symbol LPAR '(';
@@ -17,8 +22,10 @@ symbol RPAR ')';
 symbol LSQBR '[';
 symbol RSQBR ']';
 symbol EQ '=';
+symbol DOT '\.';
 symbol SEMICOLON ';';
 symbol COMMA ',';
+symbol EXCL_MARK '!';
 
 token PRINT /System\.out\.println/;
 token ID /[a-zA-Z_][a-zA-Z_0-9]*/;
@@ -76,4 +83,31 @@ print_stmt -> PRINT LPAR expr RPAR SEMICOLON;
 
 assignment -> ID (LSQBR idx#expr RSQBR)? EQ expr SEMICOLON;
 
-expr -> ID | INT | 'this';
+expr -> binary_expr;
+
+binary_expr -> op1#op_expr (operator op2#expr)?;
+
+operator -> AND | LT | PLUS | MINUS | MULT;
+
+op_expr -> base_expr (DOT 'length' | (elem_access|call)+ )?;
+
+base_expr ->
+    INT |
+    bool_expr |
+    ID |
+    'this' |
+    constructor_call |
+    negation |
+    group;
+
+bool_expr -> 'true' | 'false';
+
+constructor_call -> 'new' ('int' LSQBR expr RSQBR | ID LPAR RPAR);
+
+negation -> EXCL_MARK expr;
+
+group -> LPAR expr RPAR;
+
+elem_access -> LSQBR expr RSQBR;
+
+call -> DOT ID LPAR (expr (COMMA expr)*)? RPAR;

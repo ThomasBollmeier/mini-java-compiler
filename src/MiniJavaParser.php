@@ -14,5 +14,6 @@ class MiniJavaParser extends MiniJavaBaseParser
     public function __construct()
     {
         parent::__construct();
+        //$this->getLexer()->enableMultipleTypesPerToken();
     }
 }
