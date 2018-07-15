@@ -2,7 +2,7 @@
 Grammar for MiniJava language
 (see http://www.cambridge.org/resources/052182060X/MCIIJ2e/grammar.htm)
 Author: Thomas Bollmeier 2018 <entwickler@tbollmeier.de>
-Version: 0.1.0
+Version: 0.2.0
 *)
 
 -- Lexical elements
@@ -85,11 +85,11 @@ assignment -> ID (LSQBR idx#expr RSQBR)? EQ expr SEMICOLON;
 
 expr -> binary_expr;
 
-binary_expr -> op1#op_expr (operator op2#expr)?;
+binary_expr -> op1#operand_expr (operator op2#operand_expr)?;
 
 operator -> AND | LT | PLUS | MINUS | MULT;
 
-op_expr -> base_expr (DOT 'length' | (elem_access|call)+ )?;
+operand_expr -> base_expr (elem_access|call)* (DOT 'length')?;
 
 base_expr ->
     INT |

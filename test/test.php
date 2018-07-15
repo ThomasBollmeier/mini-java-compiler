@@ -7,13 +7,15 @@
  */
 
 require_once "../vendor/autoload.php";
+use tbollmeier\parsian\Parser;
+use tbollmeier\parsian\input\CharInput;
 
 $parser = new tbollmeier\minijava\MiniJavaParser();
 
-function showTokens(tbollmeier\parsian\Parser $parser, $code)
+function showTokens(Parser $parser, CharInput $charIn)
 {
     $lexer = $parser->getLexer();
-    $tokenStream = $lexer->createTokenInput(new \tbollmeier\parsian\input\StringCharInput($code));
+    $tokenStream = $lexer->createTokenInput($charIn);
 
     $tokenStream->open();
     while ($tokenStream->hasMoreTokens()) {
@@ -26,11 +28,11 @@ function showTokens(tbollmeier\parsian\Parser $parser, $code)
 
 /**
  * @param $parser
- * @param $code
+ * @param $filePath
  */
-function showAst($parser, $code): void
+function showAst(Parser $parser, $filePath): void
 {
-    $ast = $parser->parseString($code);
+    $ast = $parser->parseFile($filePath);
 
     if ($ast !== false) {
         echo $ast->toXml();
@@ -39,46 +41,4 @@ function showAst($parser, $code): void
     }
 }
 
-$code = <<<CODE
-class Main {
-    /* This is a /* nested */ comment */
-    public static void main(String[] args) {
-        System.out.println (42);
-    }
-}
-
-class Person {
-    
-    boolean isMale;
-    int age;
-    
-    public int getAge() {
-        return age;
-    }
-    
-    public boolean isMale() {
-        return isMale;
-    }
-    
-}
-
-class Employee extends Person {
-
-    int[] elements;
-    Person manager;
-    boolean isFemale;
-    
-    public int set_element(int i, int value) {
-        elements[i] = value + elements.length;
-        manager = new Person();
-        isFemale = !(new Person().isMale());
-        return 0;
-    }
-
-}
-CODE;
-
-echo $code . "\n";
-
-//showTokens($parser, $code);
-showAst($parser, $code);
+showAst($parser, "data\TreeVisitor.minijava");

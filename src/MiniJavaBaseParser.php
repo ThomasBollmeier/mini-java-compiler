@@ -129,14 +129,14 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar->rule("operator",
             $this->alt_3(),
             false);
-        $grammar->rule("op_expr",
+        $grammar->rule("operand_expr",
             $this->seq_21(),
             false);
         $grammar->rule("base_expr",
-            $this->alt_6(),
+            $this->alt_5(),
             false);
         $grammar->rule("bool_expr",
-            $this->alt_7(),
+            $this->alt_6(),
             false);
         $grammar->rule("constructor_call",
             $this->seq_23(),
@@ -195,20 +195,11 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar = $this->getGrammar();
 
         return $grammar->alt()
-            ->add($this->seq_22())
-            ->add($grammar->oneOrMore($this->alt_5()));
-    }
-
-    private function alt_5()
-    {
-        $grammar = $this->getGrammar();
-
-        return $grammar->alt()
             ->add($grammar->ruleRef("elem_access"))
             ->add($grammar->ruleRef("call"));
     }
 
-    private function alt_6()
+    private function alt_5()
     {
         $grammar = $this->getGrammar();
 
@@ -222,7 +213,7 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->ruleRef("group"));
     }
 
-    private function alt_7()
+    private function alt_6()
     {
         $grammar = $this->getGrammar();
 
@@ -231,7 +222,7 @@ class MiniJavaBaseParser extends parsian\Parser
             ->add($grammar->term("FALSE"));
     }
 
-    private function alt_8()
+    private function alt_7()
     {
         $grammar = $this->getGrammar();
 
@@ -353,7 +344,7 @@ class MiniJavaBaseParser extends parsian\Parser
         $grammar = $this->getGrammar();
 
         return $grammar->seq()
-            ->add($grammar->ruleRef("op_expr", "op1"))
+            ->add($grammar->ruleRef("operand_expr", "op1"))
             ->add($grammar->opt($this->seq_20()));
     }
 
@@ -378,7 +369,7 @@ class MiniJavaBaseParser extends parsian\Parser
 
         return $grammar->seq()
             ->add($grammar->ruleRef("operator"))
-            ->add($grammar->ruleRef("expr", "op2"));
+            ->add($grammar->ruleRef("operand_expr", "op2"));
     }
 
     private function seq_21()
@@ -387,7 +378,8 @@ class MiniJavaBaseParser extends parsian\Parser
 
         return $grammar->seq()
             ->add($grammar->ruleRef("base_expr"))
-            ->add($grammar->opt($this->alt_4()));
+            ->add($grammar->many($this->alt_4()))
+            ->add($grammar->opt($this->seq_22()));
     }
 
     private function seq_22()
@@ -405,7 +397,7 @@ class MiniJavaBaseParser extends parsian\Parser
 
         return $grammar->seq()
             ->add($grammar->term("NEW"))
-            ->add($this->alt_8());
+            ->add($this->alt_7());
     }
 
     private function seq_24()
