@@ -11,7 +11,7 @@
 
   "require": {
     "php": "^7.1",
-    "tbollmeier/parsian": "v1.7.4",
+    "tbollmeier/parsian": "v1.7.5",
     "phpunit/phpunit": "6.1.4"
   }
 
