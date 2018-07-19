@@ -6,6 +6,8 @@
  * Time: 18:14
  */
 
+namespace tbollmeier\minijava;
+
 require_once "../vendor/autoload.php";
 use tbollmeier\parsian\input\CharInput;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +21,7 @@ class ParserTest extends TestCase {
     protected function setUp()
     {
         parent::setUp();
-        $this->parser = new tbollmeier\minijava\MiniJavaParser();
+        $this->parser = new MiniJavaParser();
     }
 
     protected function tearDown()
@@ -30,14 +32,19 @@ class ParserTest extends TestCase {
 
     public function testParseFiles()
     {
-        $this->parseFile("data\BinarySearch.minijava");
-        $this->parseFile("data\Factorial.minijava");
-        $this->parseFile("data\TreeVisitor.minijava");
+        $this->parseFile("BinarySearch");
+        $this->parseFile("BinaryTree");
+        $this->parseFile("BubbleSort");
+        $this->parseFile("Factorial");
+        $this->parseFile("LinearSearch");
+        $this->parseFile("LinkedList");
+        $this->parseFile("QuickSort");
+        $this->parseFile("TreeVisitor");
     }
 
-    private function parseFile($filePath)
+    private function parseFile($fileName)
     {
-        $ast = $this->parser->parseFile($filePath);
+        $ast = $this->parser->parseFile("data\\$fileName.minijava");
 
         $this->assertNotFalse($ast, $this->parser->error());
 
