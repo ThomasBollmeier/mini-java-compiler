@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "828795888804bd63c1fe8475c9bf0281",
+    "content-hash": "a7debe830fdc72e1536960de1e6e2e66",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -1378,16 +1378,16 @@
         },
         {
             "name": "tbollmeier/parsian",
-            "version": "v1.7.5",
+            "version": "v1.7.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ThomasBollmeier/parsian.git",
-                "reference": "776826c1410ae820c3576f896758404efa18d275"
+                "reference": "5b2beaeef0873c2bb73e2ad5e778c5ef55783ec3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThomasBollmeier/parsian/zipball/776826c1410ae820c3576f896758404efa18d275",
-                "reference": "776826c1410ae820c3576f896758404efa18d275",
+                "url": "https://api.github.com/repos/ThomasBollmeier/parsian/zipball/5b2beaeef0873c2bb73e2ad5e778c5ef55783ec3",
+                "reference": "5b2beaeef0873c2bb73e2ad5e778c5ef55783ec3",
                 "shasum": ""
             },
             "require": {
@@ -1414,7 +1414,7 @@
                 }
             ],
             "description": "A library to support parser development",
-            "time": "2018-07-18T19:29:25+00:00"
+            "time": "2018-07-19T20:25:53+00:00"
         },
         {
             "name": "theseer/tokenizer",
